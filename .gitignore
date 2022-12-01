@@ -13,3 +13,6 @@ Cargo.lock
 # Added by cargo
 
 /target
+
+# default name of gcc output
+a.out
