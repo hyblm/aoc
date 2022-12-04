@@ -10,18 +10,16 @@ FILE *read_file(char *filename)
         printf("Error reading input file\n");
         exit(-1);
     }
-    else
-    {
-        return input;
-    }
+    return input;
 }
 
-void part_one(char line[], FILE *input)
+void part_one(FILE *input)
 {
 
     int current = 0;
     int biggest = 0;
-    while (fgets(line, 2237, input) != NULL)
+    char line[100];
+    while (fgets(line, 100, input) != NULL)
     {
         if (strcmp(line, "\n"))
         {
@@ -40,16 +38,15 @@ void part_one(char line[], FILE *input)
     printf("%d\n", biggest);
 }
 
-void part_two(char line[], FILE *input)
+void part_two(FILE *input)
 {
     int current = 0;
+    char line[100];
     int elves[3] = {0, 0, 0};
-    while (fgets(line, 2237, input) != NULL)
+    while (fgets(line, 100, input) != NULL)
     {
         if (strcmp(line, "\n"))
-        {
             current += atoi(line);
-        }
         else
         {
             for (char i = 0; i < 3; i++)
@@ -81,11 +78,9 @@ void part_two(char line[], FILE *input)
 
 int main(void)
 {
-    char line[2237];
-
     FILE *input;
     input = read_file("input.txt");
-    part_one(line, input);
-    input = read_file("input.txt");
-    part_two(line, input);
+    part_one(input);
+    rewind(input);
+    part_two(input);
 }

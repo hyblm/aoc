@@ -10,36 +10,33 @@ FILE *read_file(char *filename)
         printf("Error reading input file\n");
         exit(-1);
     }
-    else
-    {
-        return input;
-    }
+    return input;
 }
 
 void part_one(FILE *input)
 {
-    char line[5];
+    char op, me, result;
     int score = 0;
-    while (fgets(line, 5, input) != NULL)
+    while (fscanf(input, "%c %c\n", &op, &me) == 2)
     {
-        line[0] = 68 - line[0];            // opponents play (R-2, P-1, S-0)
-        line[2] -= 87;                     // my play (R-1, P-2, S-3)
-        line[1] = (line[0] + line[2]) % 3; // Outcome (L-0, D-1, W-2)
-        score += line[1] * 3 + line[2];
+        op = 68 - op;           // opponents play (R-2, P-1, S-0)
+        me -= 87;               // my play (R-1, P-2, S-3)
+        result = (op + me) % 3; // Outcome (L-0, D-1, W-2)
+        score += result * 3 + me;
     }
     printf("\nPart 1: %d\n", score);
 }
 
 void part_two(FILE *input)
 {
-    char line[5];
+    char op, me, result;
     int score = 0;
-    while (fgets(line, 5, input) != NULL)
+    while (fscanf(input, "%c %c\n", &op, &result) == 2)
     {
-        line[0] -= 65;                             // opponents play (0, 1, 2)
-        line[2] -= 88;                             // Result (0, 1, 2)
-        line[1] = (line[0] + line[2] + 2) % 3 + 1; // shape I should play (1, 2, 3)
-        score += 3 * line[2] + line[1];
+        op -= 65;                       // opponents play (0, 1, 2)
+        result -= 88;                   // Result (0, 1, 2)
+        me = (op + result + 2) % 3 + 1; // shape I should play (1, 2, 3)
+        score += 3 * result + me;
     }
     printf("\nPart 2: %d\n", score);
 }
