@@ -16,3 +16,4 @@ Cargo.lock
 
 # default name of gcc output
 a.out
+.envrc
