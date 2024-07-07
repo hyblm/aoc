@@ -15,14 +15,14 @@ FILE *read_file(char *filename)
 
 void part_one(FILE *input)
 {
-    char op, me, result;
+    char op, me, outcome;
     int score = 0;
     while (fscanf(input, "%c %c\n", &op, &me) == 2)
     {
-        op = 68 - op;           // opponents play (R-2, P-1, S-0)
-        me -= 87;               // my play (R-1, P-2, S-3)
-        result = (op + me) % 3; // Outcome (L-0, D-1, W-2)
-        score += result * 3 + me;
+        op = 'D' - op;           // opponents play (R-2, P-1, S-0)
+        me -= 'W';               //        my play (R-1, P-2, S-3)
+        outcome = (op + me) % 3; //        Outcome (L-0, D-1, W-2)
+        score += outcome * 3 + me;
     }
     printf("\nPart 1: %d\n", score);
 }
@@ -33,8 +33,8 @@ void part_two(FILE *input)
     int score = 0;
     while (fscanf(input, "%c %c\n", &op, &result) == 2)
     {
-        op -= 65;                       // opponents play (0, 1, 2)
-        result -= 88;                   // Result (0, 1, 2)
+        op -= 'A';                      // opponents play (0, 1, 2) A is start of abc
+        result -= 'X';                  // Result         (0, 1, 2) X is start of xyz
         me = (op + result + 2) % 3 + 1; // shape I should play (1, 2, 3)
         score += 3 * result + me;
     }
