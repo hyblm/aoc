@@ -1,0 +1,1 @@
+FlatMap<std::str::Lines<'_>, FlatMap<std::str::Split<'_, char>, (&str, &str), [closure@src/main.rs:4:51: 4:54]>, [closure@src/main.rs:4:19: 4:25]>
