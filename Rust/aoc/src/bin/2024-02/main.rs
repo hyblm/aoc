@@ -1,46 +1,29 @@
 fn main() {
-    part1();
-    part2();
+    let reports = parse_input();
+
+    println!("part 1: {}", part1(&reports));
+    println!("part 2: {}", part2(&reports));
 }
 
-fn part1() {
+fn parse_input() -> Vec<Vec<isize>> {
     let input = include_str!("input.txt");
-    let mut safe_count = 0;
-    let mut report = Vec::new();
-
-    for line in input.lines() {
-        let levels = line.split_whitespace().map(|x| x.parse::<isize>().unwrap());
-        report.extend(levels);
-
-        if is_safe(&report) {
-            safe_count += 1;
-        }
-        report.clear();
-    }
-
-    println!("{safe_count}");
+    let reports: Vec<Vec<isize>> = input
+        .lines()
+        .map(|line| {
+            line.split_whitespace()
+                .map(|x| x.parse().unwrap())
+                .collect()
+        })
+        .collect();
+    reports
 }
 
-fn part2() {
-    let input = include_str!("input.txt");
-    let mut safe_count = 0;
-    let mut report = Vec::new();
+fn part1(reports: &[Vec<isize>]) -> usize {
+    reports.iter().filter(|x| is_safe(x)).count()
+}
 
-    for line in input.lines() {
-        let levels = line.split_whitespace().map(|x| x.parse::<isize>().unwrap());
-        report.extend(levels);
-
-        let report_is_safe = problem_dampener(&report);
-        if report_is_safe {
-            safe_count += 1;
-        } else {
-            eprintln!("{report:?}");
-        }
-
-        report.clear();
-    }
-
-    println!("{safe_count}");
+fn part2(reports: &[Vec<isize>]) -> usize {
+    reports.iter().filter(|x| problem_dampener(x)).count()
 }
 
 fn problem_dampener(report: &[isize]) -> bool {
@@ -59,15 +42,10 @@ fn problem_dampener(report: &[isize]) -> bool {
 }
 
 fn is_safe(report: &[isize]) -> bool {
-    let steps = report.windows(2).map(|x| x[0] - x[1]);
-    let is_gradual = steps.clone().all(|x| x.abs() < 4);
-    let transition_count = report.len().saturating_sub(1);
-    let decreasing_count = steps.clone().filter(|x| x.is_positive()).count();
-    let equal_count = steps.clone().filter(|x| *x == 0).count();
-    let is_monotonic = decreasing_count == 0 || decreasing_count == transition_count;
-    let is_monotonic = is_monotonic && equal_count == 0;
+    let all_decreasing = report.windows(2).all(|x| (1..4).contains(&(x[0] - x[1])));
+    let all_encreasing = report.windows(2).all(|x| (1..4).contains(&(x[1] - x[0])));
 
-    is_gradual && is_monotonic
+    all_decreasing || all_encreasing
 }
 
 #[cfg(test)]
