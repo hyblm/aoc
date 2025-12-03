@@ -1,8 +1,12 @@
 #![allow(unused)]
 
 static INPUT: &str = include_str!("input.txt");
+fn main() {
+    let input = parse_input(INPUT);
+    println!("part 1: {}", part1(&input));
+    println!("part 2: {}", part2(&input));
+}
 
-static DIAL_MIN: usize = 0;
 static DIAL_MAX: usize = 100;
 static DIAL_INITIAL: usize = 50;
 
@@ -12,14 +16,8 @@ enum Rotation {
     Right { distance: usize }, // current position encreases
 }
 
-fn main() {
-    let input = parse_input();
-    println!("part 1: {}", part1(&input));
-    println!("part 2: {}", part2(&input));
-}
-
-fn parse_input() -> Vec<Rotation> {
-    INPUT
+fn parse_input(input: &str) -> Vec<Rotation> {
+    input
         .lines()
         .map(|line| {
             let (direction, distance) = line.split_at(1);
@@ -38,9 +36,7 @@ fn part1(rotations: &[Rotation]) -> usize {
         .iter()
         .scan(DIAL_INITIAL, |dial, rotation| {
             *dial += match rotation {
-                Rotation::Left { distance } => {
-                    (DIAL_MAX * (((distance / DIAL_MAX) * 2) + 1)) - distance
-                }
+                Rotation::Left { distance } => DIAL_MAX - (distance % DIAL_MAX),
                 Rotation::Right { distance } => *distance,
             };
             *dial %= DIAL_MAX;
@@ -51,12 +47,26 @@ fn part1(rotations: &[Rotation]) -> usize {
 }
 
 fn part2(rotations: &[Rotation]) -> usize {
-    let mut zero_count = 0;
-    let mut dial = DIAL_INITIAL;
-    for rotation in rotations {
-        zero_count += apply_rotation_and_count_zeroes(&mut dial, *rotation);
-    }
-    zero_count
+    rotations
+        .iter()
+        .scan(DIAL_INITIAL, |dial, rotation| {
+            Some(apply_rotation_and_count_zeroes(dial, *rotation))
+        })
+        .sum()
+}
+
+fn apply_rotation_and_count_zeroes(dial: &mut usize, rotation: Rotation) -> usize {
+    let (distance_from_zero, apply_distance) = match rotation {
+        Rotation::Left { distance } => (
+            (DIAL_MAX - *dial) % DIAL_MAX + distance,
+            DIAL_MAX - (distance % DIAL_MAX),
+        ),
+        Rotation::Right { distance } => (*dial + distance, distance % DIAL_MAX),
+    };
+    *dial += apply_distance;
+    *dial %= DIAL_MAX;
+
+    distance_from_zero / DIAL_MAX
 }
 
 fn brute_force(dial: &mut usize, rotation: Rotation) -> usize {
@@ -64,7 +74,7 @@ fn brute_force(dial: &mut usize, rotation: Rotation) -> usize {
     match rotation {
         Rotation::Left { distance } => {
             let step = |x| if x == 0 { DIAL_MAX - 1 } else { x - 1 };
-            for i in 0..distance {
+            for _ in 0..distance {
                 *dial = step(*dial);
                 if *dial == 0 {
                     zeros_seen += 1;
@@ -73,7 +83,7 @@ fn brute_force(dial: &mut usize, rotation: Rotation) -> usize {
         }
         Rotation::Right { distance } => {
             let step = |x| if x == (DIAL_MAX - 1) { 0 } else { x + 1 };
-            for i in 0..distance {
+            for _ in 0..distance {
                 *dial = step(*dial);
                 if *dial == 0 {
                     zeros_seen += 1;
@@ -83,50 +93,54 @@ fn brute_force(dial: &mut usize, rotation: Rotation) -> usize {
     };
     zeros_seen
 }
-fn apply_rotation_and_count_zeroes(dial: &mut usize, rotation: Rotation) -> usize {
-    // let seen_zero = match rotation {
-    //     Rotation::Left { distance } => {
-    //         let mut seen_zero = distance / DIAL_MAX;
-    //         let left_to_rotate = distance % DIAL_MAX;
-    //         match left_to_rotate.cmp(dial) {
-    //             std::cmp::Ordering::Less => *dial -= left_to_rotate,
-    //             std::cmp::Ordering::Equal => {
-    //                 seen_zero += 1;
-    //                 *dial = 0;
-    //             }
-    //             std::cmp::Ordering::Greater => {
-    //                 seen_zero += 1;
-    //                 *dial = DIAL_MAX - (left_to_rotate - *dial);
-    //             }
-    //         }
-    //         seen_zero
-    //
-    //         // if distance == 0 {
-    //         //     return 0;
-    //         // };
-    //         // let overturns = distance / DIAL_MAX;
-    //         // *dial += DIAL_MAX - (distance % DIAL_MAX);
-    //         // if *dial <= DIAL_MAX {
-    //         //     overturns + 1
-    //         // } else {
-    //         //     overturns
-    //         // }
-    //     }
-    //     Rotation::Right { distance } => {
-    //         *dial += distance;
-    //         *dial / DIAL_MAX
-    //     }
-    // };
-    // *dial %= DIAL_MAX;
-    zeros_seen
-}
 
 #[cfg(test)]
 mod test {
-    use crate::{DIAL_INITIAL, Rotation, apply_rotation_and_count_zeroes};
-
     mod left {
-        use crate::{DIAL_INITIAL, Rotation, apply_rotation_and_count_zeroes};
+        use crate::{DIAL_INITIAL, DIAL_MAX, Rotation, apply_rotation_and_count_zeroes};
+        #[test]
+        fn starting_at_zero_zero() {
+            let mut dial = 0;
+            let seen_zero =
+                apply_rotation_and_count_zeroes(&mut dial, Rotation::Left { distance: 0 });
+            assert_eq!(seen_zero, 0);
+            assert_eq!(dial, 0);
+        }
+
+        #[test]
+        fn starting_at_zero_less_than_full_rotation() {
+            let mut dial = 0;
+            let seen_zero = apply_rotation_and_count_zeroes(
+                &mut dial,
+                Rotation::Left {
+                    distance: DIAL_MAX / 2,
+                },
+            );
+            assert_eq!(seen_zero, 0);
+            assert_eq!(dial, DIAL_MAX / 2);
+        }
+
+        #[test]
+        fn starting_at_zero_multiple_turns_lands_on_zero() {
+            let mut dial = 0;
+            let seen_zero = apply_rotation_and_count_zeroes(
+                &mut dial,
+                Rotation::Left {
+                    distance: 5 * DIAL_MAX,
+                },
+            );
+            assert_eq!(seen_zero, 5);
+            assert_eq!(dial, 0);
+        }
+
+        #[test]
+        fn starting_at_zero_multiple_turns_overshoots() {
+            let mut dial = 0;
+            let seen_zero =
+                apply_rotation_and_count_zeroes(&mut dial, Rotation::Left { distance: 560 });
+            assert_eq!(seen_zero, 5);
+            assert_eq!(dial, DIAL_MAX - (560 % DIAL_MAX));
+        }
 
         #[test]
         fn zero() {

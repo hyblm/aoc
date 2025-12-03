@@ -1,17 +1,12 @@
-#![allow(unused)]
-
-use std::ops::{ControlFlow, RangeInclusive};
-
 static INPUT: &str = include_str!("input.txt");
-
 fn main() {
-    let input = parse_input();
+    let input = parse_input(INPUT);
     println!("part 1: {}", part1(&input));
     println!("part 2: {}", part2(&input));
 }
 
-fn parse_input() -> Vec<(usize, usize)> {
-    INPUT
+fn parse_input(input: &str) -> Vec<(usize, usize)> {
+    input
         .trim()
         .split(',')
         .map(|range| {
@@ -42,7 +37,7 @@ fn part1(ranges: &[(usize, usize)]) -> usize {
 
 fn count_digits(start: usize) -> u32 {
     let mut exponent = 0;
-    let mut radix = 10;
+    let radix = 10;
     let mut divisor = 1;
     while (start / divisor) > 0 {
         exponent += 1;
@@ -58,7 +53,7 @@ fn part2(ranges: &[(usize, usize)]) -> usize {
             let digit_count = count_digits(id);
             for repetition in 2..=digit_count {
                 if digit_count.is_multiple_of(repetition)
-                    && let Some(invalid_id) = fun_name(id, digit_count, repetition)
+                    && let Some(invalid_id) = validate_id(id, digit_count, repetition)
                 {
                     invalid_id_sum += invalid_id;
                     continue 'id_check;
@@ -69,7 +64,7 @@ fn part2(ranges: &[(usize, usize)]) -> usize {
     invalid_id_sum
 }
 
-fn fun_name(id: usize, digit_count: u32, repetition_count: u32) -> Option<usize> {
+fn validate_id(id: usize, digit_count: u32, repetition_count: u32) -> Option<usize> {
     let exp = digit_count / repetition_count;
     let sentinel = {
         let mut sentinel = 1;
