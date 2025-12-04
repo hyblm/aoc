@@ -25,26 +25,21 @@ fn part1(map: &[Vec<bool>]) -> usize {
 
 fn part2(mut map: Vec<Vec<bool>>) -> usize {
     let mut remove_count = 0;
-    let mut remove_list = Vec::new();
     loop {
-        let iter = (0..map.len())
-            .flat_map(|y| (0..map[0].len()).map(move |x| (y, x)))
-            .filter(|&(y, x)| map[y][x] && adjacent_count(&map, y, x) < 4);
-        remove_list.extend(iter);
-
-        for position in &remove_list {
-            assert!(map[position.0][position.1]);
-            map[position.0][position.1] = false;
+        let mut rolls_removed_in_pass = 0;
+        for y in 0..map.len() {
+            for x in 0..map[0].len() {
+                if map[y][x] && adjacent_count(&map, y, x) < 4 {
+                    map[y][x] = false;
+                    rolls_removed_in_pass += 1;
+                }
+            }
         }
-        let rolls_removed_in_pass = remove_list.len();
         remove_count += rolls_removed_in_pass;
         if rolls_removed_in_pass == 0 {
-            break;
+            break remove_count;
         }
-        remove_list.clear();
     }
-
-    remove_count
 }
 
 fn adjacent_count(map: &[Vec<bool>], y: usize, x: usize) -> i32 {
