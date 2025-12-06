@@ -19,52 +19,34 @@ fn parse_input(input: &str) -> Vec<(usize, usize)> {
 }
 
 fn part1(ranges: &[(usize, usize)]) -> usize {
-    let mut invalid_id_sum = 0;
-    for range in ranges {
-        for id in range.0..=range.1 {
-            let digit_count = count_digits(id);
-            if !digit_count.is_multiple_of(2) {
-                continue;
-            }
-            let sentinel: usize = 10usize.pow(digit_count / 2) + 1;
-            if id.is_multiple_of(sentinel) {
-                invalid_id_sum += id;
-            }
-        }
-    }
-    invalid_id_sum
-}
-
-fn count_digits(start: usize) -> u32 {
-    let mut exponent = 0;
-    let radix = 10;
-    let mut divisor = 1;
-    while (start / divisor) > 0 {
-        exponent += 1;
-        divisor *= radix;
-    }
-    exponent
+    ranges
+        .iter()
+        .flat_map(|range| {
+            (range.0..=range.1).filter_map(|id| validate_id_inner(id, count_digits(id), 2))
+        })
+        .sum()
 }
 
 fn part2(ranges: &[(usize, usize)]) -> usize {
-    let mut invalid_id_sum = 0;
-    for range in ranges {
-        'id_check: for id in range.0..=range.1 {
-            let digit_count = count_digits(id);
-            for repetition in 2..=digit_count {
-                if digit_count.is_multiple_of(repetition)
-                    && let Some(invalid_id) = validate_id(id, digit_count, repetition)
-                {
-                    invalid_id_sum += invalid_id;
-                    continue 'id_check;
-                };
-            }
-        }
-    }
-    invalid_id_sum
+    ranges
+        .iter()
+        .flat_map(|range| (range.0..=range.1).map(validate_id))
+        .sum()
 }
 
-fn validate_id(id: usize, digit_count: u32, repetition_count: u32) -> Option<usize> {
+fn validate_id(id: usize) -> usize {
+    let digit_count = count_digits(id);
+    for repetition in 2..=digit_count {
+        if digit_count.is_multiple_of(repetition)
+            && let Some(invalid_id) = validate_id_inner(id, digit_count, repetition)
+        {
+            return invalid_id;
+        };
+    }
+    0
+}
+
+fn validate_id_inner(id: usize, digit_count: u32, repetition_count: u32) -> Option<usize> {
     let exp = digit_count / repetition_count;
     let sentinel = {
         let mut sentinel = 1;
@@ -77,4 +59,15 @@ fn validate_id(id: usize, digit_count: u32, repetition_count: u32) -> Option<usi
         return Some(id);
     }
     None
+}
+
+fn count_digits(start: usize) -> u32 {
+    let mut exponent = 0;
+    let radix = 10;
+    let mut divisor = 1;
+    while (start / divisor) > 0 {
+        exponent += 1;
+        divisor *= radix;
+    }
+    exponent
 }

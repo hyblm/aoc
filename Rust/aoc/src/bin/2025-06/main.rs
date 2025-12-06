@@ -52,7 +52,6 @@ fn parse_input2(input: &str) -> Vec<Problem> {
         .split_whitespace()
         .map(|c| {
             start_positions.push(c.as_ptr().addr() - first_line.as_ptr().addr());
-
             Problem {
                 op: match c {
                     "*" => Op::Mul,
@@ -88,7 +87,6 @@ fn parse_input2(input: &str) -> Vec<Problem> {
             }
         }
     }
-
     problems
 }
 

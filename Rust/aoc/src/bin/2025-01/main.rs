@@ -61,7 +61,7 @@ fn apply_rotation_and_count_zeroes(dial: &mut usize, rotation: Rotation) -> usiz
             (DIAL_MAX - *dial) % DIAL_MAX + distance,
             DIAL_MAX - (distance % DIAL_MAX),
         ),
-        Rotation::Right { distance } => (*dial + distance, distance % DIAL_MAX),
+        Rotation::Right { distance } => (*dial + distance, distance),
     };
     *dial += apply_distance;
     *dial %= DIAL_MAX;
