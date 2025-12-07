@@ -6,5 +6,6 @@ default-run = "2025-07"
 
 [profile.release]
 panic = "abort"
+debug = true
 
 [dependencies]
