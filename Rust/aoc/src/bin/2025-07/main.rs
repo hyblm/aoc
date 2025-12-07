@@ -21,18 +21,15 @@ fn parse_input(input: &str) -> (usize, usize, Vec<usize>) {
 }
 
 fn part1(start_x: usize, width: usize, splitters: &[usize]) -> usize {
-    let mut split_count = 0;
     let mut timeline_tails = vec![0; width];
     timeline_tails[start_x] = 1;
     for &x in splitters {
-        if timeline_tails[x] == 1 {
-            split_count += 1;
-            timeline_tails[x] = 0;
-            timeline_tails[x - 1] = 1;
-            timeline_tails[x + 1] = 1;
-        }
+        let beams = timeline_tails[x];
+        timeline_tails[x] = 0;
+        timeline_tails[x - 1] += beams;
+        timeline_tails[x + 1] += if beams > 0 { 1 } else { 0 };
     }
-    split_count
+    timeline_tails.iter().sum::<usize>() - 1
 }
 
 fn part2(start_x: usize, width: usize, splitters: &[usize]) -> usize {
