@@ -14,13 +14,12 @@ fn parse_input(input: &str) -> Vec<Vec<bool>> {
 
 fn part1(map: &[Vec<bool>]) -> usize {
     (0..map.len())
-        .flat_map(|y| {
-            (0..map[0].len()).map(move |x| {
-                let accessible = map[y][x] && adjacent_count(map, y, x) < 4;
-                if accessible { 1 } else { 0 }
-            })
-        })
-        .sum()
+        .flat_map(|y| (0..map[0].len()).filter(move |&x| has_accessible_roll(map, x, y)))
+        .count()
+}
+
+fn has_accessible_roll(map: &[Vec<bool>], x: usize, y: usize) -> bool {
+    map[y][x] && adjacent_count(map, y, x) < 4
 }
 
 fn part2(mut map: Vec<Vec<bool>>) -> usize {
@@ -29,7 +28,7 @@ fn part2(mut map: Vec<Vec<bool>>) -> usize {
         let mut rolls_removed_in_pass = 0;
         for y in 0..map.len() {
             for x in 0..map[0].len() {
-                if map[y][x] && adjacent_count(&map, y, x) < 4 {
+                if has_accessible_roll(&map, x, y) {
                     map[y][x] = false;
                     rolls_removed_in_pass += 1;
                 }
@@ -42,24 +41,20 @@ fn part2(mut map: Vec<Vec<bool>>) -> usize {
     }
 }
 
-fn adjacent_count(map: &[Vec<bool>], y: usize, x: usize) -> i32 {
+#[rustfmt::skip]
+static NEIGHBOR_IDXS: [(isize, isize); 8] = [
+    (-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1),
+];
+fn adjacent_count(map: &[Vec<bool>], y: usize, x: usize) -> usize {
     let width = map[0].len();
     let height = map.len();
-    let mut adjacent_count = -1;
-    for y_offset in -1..=1 {
-        for x_offset in -1..=1 {
+    NEIGHBOR_IDXS
+        .iter()
+        .filter(|(y_offset, x_offset)| {
             let new_y = (y as isize + y_offset) as usize;
-            if new_y >= height {
-                continue;
-            }
             let new_x = (x as isize + x_offset) as usize;
-            if new_x >= width {
-                continue;
-            }
-            if map[new_y][new_x] {
-                adjacent_count += 1;
-            }
-        }
-    }
-    adjacent_count
+            let is_in_bounds = new_y < height && new_x < width;
+            is_in_bounds && map[new_y][new_x]
+        })
+        .count()
 }
