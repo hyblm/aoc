@@ -22,3 +22,10 @@ pub fn ranges_merge_consecutive_into<T: Ord + Copy>(ranges: &[Range<T>], out: &m
     }
     out.push(start..end);
 }
+
+pub fn all_pairs<T: Copy>(red_tile_positions: &[T]) -> impl Iterator<Item = (T, T)> {
+    red_tile_positions
+        .iter()
+        .enumerate()
+        .flat_map(|(i, &p1)| red_tile_positions[i + 1..].iter().map(move |&p2| (p1, p2)))
+}
