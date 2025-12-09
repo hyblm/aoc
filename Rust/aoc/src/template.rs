@@ -1,21 +1,18 @@
 static INPUT: &str = include_str!("test.txt");
-
 fn main() {
-    let input = parse_input();
+    let input = parse_input(INPUT);
     println("part 1: {}", part1(&input));
     println("part 2: {}", part2(&input));
 }
 
-fn parse_input() -> _ {
-    INPUT
+fn parse_input(input: &str) -> () {
+    input.lines()
 }
 
-fn part1() -> isize {
-    let mut result = 0;
-    println!("{result}");
+fn part1() -> usize {
+    0
 }
 
-fn part2() -> isize {
-    let mut result = 0;
-    println!("{result}");
+fn part2() -> usize {
+    0
 }

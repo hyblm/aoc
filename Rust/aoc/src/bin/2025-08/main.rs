@@ -4,15 +4,8 @@ static INPUT: &str = include_str!("input.txt");
 #[allow(arithmetic_overflow)]
 fn main() {
     let junction_boxes = parse_input(INPUT);
-    let mut distances: Vec<_> = junction_boxes
-        .iter()
-        .enumerate()
-        .flat_map(|(i, &(x, y, z))| {
-            junction_boxes[i + 1..]
-                .iter()
-                .enumerate()
-                .map(move |(j, &(x2, y2, z2))| (i, j + i + 1, distance(x, y, z, x2, y2, z2)))
-        })
+    let mut distances: Vec<_> = aoc::all_pairs_indexed(&junction_boxes)
+        .map(|((i, (x, y, z)), (j, (x2, y2, z2)))| (i, j + i + 1, distance(x, y, z, x2, y2, z2)))
         .collect();
     distances.sort_by_key(|d| d.2);
     println!("part 1: {}", part1(&distances));

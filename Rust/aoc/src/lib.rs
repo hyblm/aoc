@@ -29,3 +29,14 @@ pub fn all_pairs<T: Copy>(red_tile_positions: &[T]) -> impl Iterator<Item = (T, 
         .enumerate()
         .flat_map(|(i, &p1)| red_tile_positions[i + 1..].iter().map(move |&p2| (p1, p2)))
 }
+
+pub fn all_pairs_indexed<T: Copy>(
+    red_tile_positions: &[T],
+) -> impl Iterator<Item = ((usize, T), (usize, T))> {
+    red_tile_positions.iter().enumerate().flat_map(|(i, &p1)| {
+        red_tile_positions[i + 1..]
+            .iter()
+            .enumerate()
+            .map(move |(j, &p2)| ((i, p1), (j, p2)))
+    })
+}
